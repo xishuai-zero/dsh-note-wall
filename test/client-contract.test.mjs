@@ -201,7 +201,7 @@ test('apply registers dictionaries, styles, the sidebar entry, the main panel an
     Object.keys(dictionary.dict.en).sort(),
     'zh and en dictionaries must expose the same keys',
   );
-  for (const key of ['dropHint', 'dropSaved', 'dropOpen', 'dropUnsupported', 'dropFailed', 'dropTip', 'wish', 'wishHint', 'wishNoSession', 'wishFailed']) {
+  for (const key of ['confirmDeleteAsk', 'dropHint', 'dropSaved', 'dropOpen', 'dropUnsupported', 'dropFailed', 'dropTip', 'wish', 'wishHint', 'wishNoSession', 'wishFailed']) {
     assert.equal(typeof dictionary.dict.zh[key], 'string');
     assert.equal(typeof dictionary.dict.en[key], 'string');
   }
@@ -213,6 +213,7 @@ test('apply registers dictionaries, styles, the sidebar entry, the main panel an
   assert.ok(style.textContent.includes('.nw-page'));
   assert.ok(style.textContent.includes('.nw-drop'), 'drop overlay styles are part of the injected CSS');
   assert.ok(style.textContent.includes('.nw-wish'), 'wish button styles are part of the injected CSS');
+  assert.ok(style.textContent.includes('.nw-confirm'), 'inline delete confirmation styles are part of the injected CSS');
 
   assert.deepEqual(injected, ['sidebar.panellist', 'main', 'shell.overlay', 'conversation.composer.dock']);
   assert.equal(registrations.length, 4);

@@ -51,6 +51,7 @@ window.__ModuleLoader__.load({
         retry: '重试',
         delete: '删除',
         confirmDelete: '再点一次删除',
+        confirmDeleteAsk: '确认删除吗？',
         edit: '编辑便签',
         editHint: '⌘/Ctrl + Enter 保存 · Esc 取消',
         pin: '置顶',
@@ -114,6 +115,7 @@ window.__ModuleLoader__.load({
         retry: 'Retry',
         delete: 'Delete',
         confirmDelete: 'Click again to delete',
+        confirmDeleteAsk: 'Delete this note?',
         edit: 'Edit note',
         editHint: '⌘/Ctrl + Enter to save · Esc to cancel',
         pin: 'Pin to top',
@@ -839,7 +841,7 @@ window.__ModuleLoader__.load({
         h('path', { d: 'M74 12v6M71 15h6', stroke: '#b6d7f2', strokeWidth: 1.8, strokeLinecap: 'round' }));
     }
 
-    function NoteCard({ note, t, onOpen, onWish, onUpdate, onRequestDelete, confirming, removing }) {
+    function NoteCard({ note, t, onOpen, onWish, onUpdate, onRequestDelete, onCancelDelete, confirming, removing }) {
       const tag = tagsOf(note.text)[0] ?? null;
 
       const open = (event) => {
@@ -876,37 +878,49 @@ window.__ModuleLoader__.load({
         h('p', { className: 'nw-text' }, note.text),
         h('footer', { className: 'nw-card-foot' },
           h('span', { className: 'nw-stamp' }, relativeTime(t, note.updatedAt)),
-          h('div', { className: 'nw-card-actions' },
-            h('button', {
-              type: 'button',
-              className: 'nw-wish',
-              title: t('wishHint'),
-              'aria-label': t('wishHint'),
-              onClick: keep(() => onWish(note)),
-            }, h('span', { className: 'nw-wish-glyph', 'aria-hidden': true }, '✦'), t('wish')),
-            h('button', {
-              type: 'button',
-              className: 'nw-icon nw-hover',
-              title: note.pinned ? t('unpin') : t('pin'),
-              'aria-label': note.pinned ? t('unpin') : t('pin'),
-              'data-active': note.pinned ? 'true' : 'false',
-              onClick: keep(() => { void onUpdate(note.id, { pinned: !note.pinned }); }),
-            }, h(PinIcon, { active: note.pinned })),
-            h('button', {
-              type: 'button',
-              className: 'nw-icon nw-hover nw-danger',
-              title: confirming ? t('confirmDelete') : t('delete'),
-              'aria-label': t('delete'),
-              'data-confirm': confirming ? 'true' : 'false',
-              onClick: keep(() => onRequestDelete(note.id)),
-            }, h(TrashIcon)),
-            h('button', {
-              type: 'button',
-              className: 'nw-icon',
-              title: t('edit'),
-              'aria-label': t('edit'),
-              onClick: keep(open),
-            }, h(PencilIcon)))));
+          confirming
+            ? h('div', { className: 'nw-confirm' },
+              h('span', { className: 'nw-confirm-text' }, t('confirmDeleteAsk')),
+              h('button', {
+                type: 'button',
+                className: 'nw-confirm-yes',
+                onClick: keep(() => onRequestDelete(note.id)),
+              }, t('delete')),
+              h('button', {
+                type: 'button',
+                className: 'nw-confirm-no',
+                onClick: keep(() => onCancelDelete(note.id)),
+              }, t('cancel')))
+            : h('div', { className: 'nw-card-actions' },
+              h('button', {
+                type: 'button',
+                className: 'nw-wish',
+                title: t('wishHint'),
+                'aria-label': t('wishHint'),
+                onClick: keep(() => onWish(note)),
+              }, h('span', { className: 'nw-wish-glyph', 'aria-hidden': true }, '✦'), t('wish')),
+              h('button', {
+                type: 'button',
+                className: 'nw-icon nw-hover',
+                title: note.pinned ? t('unpin') : t('pin'),
+                'aria-label': note.pinned ? t('unpin') : t('pin'),
+                'data-active': note.pinned ? 'true' : 'false',
+                onClick: keep(() => { void onUpdate(note.id, { pinned: !note.pinned }); }),
+              }, h(PinIcon, { active: note.pinned })),
+              h('button', {
+                type: 'button',
+                className: 'nw-icon nw-hover nw-danger',
+                title: t('delete'),
+                'aria-label': t('delete'),
+                onClick: keep(() => onRequestDelete(note.id)),
+              }, h(TrashIcon)),
+              h('button', {
+                type: 'button',
+                className: 'nw-icon',
+                title: t('edit'),
+                'aria-label': t('edit'),
+                onClick: keep(open),
+              }, h(PencilIcon)))));
     }
 
     function FocusNote({ note, t, rect, origin, onSave, onWish, onClose }) {
@@ -1299,6 +1313,12 @@ window.__ModuleLoader__.load({
         }, 3200);
       }, [confirmId, deleteNote]);
 
+      const cancelDelete = useCallback(() => {
+        setConfirmId(null);
+        if (confirmTimer.current !== null) clearTimeout(confirmTimer.current);
+        confirmTimer.current = null;
+      }, []);
+
       const onComposerKeyDown = (event) => {
         if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
           event.preventDefault();
@@ -1403,6 +1423,7 @@ window.__ModuleLoader__.load({
                     onWish: wish,
                     onUpdate: updateNote,
                     onRequestDelete: requestDelete,
+                    onCancelDelete: cancelDelete,
                     confirming: confirmId === note.id,
                     removing: removingId === note.id,
                   }))),
@@ -1555,12 +1576,9 @@ window.__ModuleLoader__.load({
   border-radius: 18px;
   background: var(--nw-tint, #fbf9f5);
   box-shadow: none;
-  transform: rotate(var(--nw-tilt, 0deg));
   transition: transform .3s cubic-bezier(.34, 1.56, .64, 1), box-shadow .3s ease, opacity .18s ease;
   animation: nw-pop .42s cubic-bezier(.2, .7, .2, 1) backwards;
 }
-.nw-card:nth-child(odd) { --nw-tilt: -0.4deg; }
-.nw-card:nth-child(even) { --nw-tilt: 0.3deg; }
 .nw-card:nth-child(1) { animation-delay: 0s; }
 .nw-card:nth-child(2) { animation-delay: .04s; }
 .nw-card:nth-child(3) { animation-delay: .08s; }
@@ -1569,7 +1587,7 @@ window.__ModuleLoader__.load({
 .nw-card:nth-child(6) { animation-delay: .2s; }
 .nw-card:nth-child(7) { animation-delay: .24s; }
 .nw-card:nth-child(8) { animation-delay: .28s; }
-.nw-card:hover { transform: rotate(0deg) translateY(-3px) scale(1.012); box-shadow: 0 10px 18px -16px rgba(52, 44, 20, .28); z-index: 1; }
+.nw-card:hover { transform: translateY(-3px); box-shadow: 0 10px 18px -16px rgba(52, 44, 20, .28); z-index: 1; }
 .nw-card.nw-leaving { animation: none; opacity: 0; transform: rotate(-2deg) translateY(10px) scale(.92); transition: opacity .18s ease, transform .18s ease; }
 .nw-card[data-color="amber"], .nw-focus-card[data-color="amber"] { --nw-tint: #fee6a3; --nw-accent: #b0965a; --nw-ink: #554518; --nw-soft: #c2ac6e; }
 .nw-card[data-color="rose"], .nw-focus-card[data-color="rose"] { --nw-tint: #fbd9e4; --nw-accent: #c88fa6; --nw-ink: #6a3b4b; --nw-soft: #d0a8b6; }
@@ -1615,13 +1633,13 @@ window.__ModuleLoader__.load({
 .nw-icon:hover { background: rgba(60, 52, 28, .08); color: var(--nw-ink, rgba(35, 30, 16, .85)); transform: translateY(-1px) scale(1.12); }
 .nw-icon:active { transform: translateY(0) scale(.86) rotate(-4deg); }
 .nw-icon[data-active="true"] { color: var(--nw-accent); }
-.nw-hover { opacity: 0; pointer-events: none; transform: translateY(2px); }
-.nw-card:hover .nw-hover, .nw-card:focus-within .nw-hover { opacity: 1; pointer-events: auto; transform: translateY(0); }
+.nw-hover { opacity: .8; pointer-events: auto; }
+.nw-card:hover .nw-hover, .nw-card:focus-within .nw-hover { opacity: 1; }
 .nw-wish {
   display: inline-flex; align-items: center; gap: 5px;
   height: 26px; padding: 0 10px; margin-right: 2px;
-  border: 1px solid rgba(96, 80, 38, .22); border-radius: 999px;
-  background: rgba(255, 252, 240, .55); color: var(--nw-ink, #5b4a23);
+  border: 1px solid rgba(96, 80, 38, .3); border-radius: 999px;
+  background: rgba(255, 252, 240, .82); color: var(--nw-ink, #5b4a23);
   font: inherit; font-size: 11.5px; line-height: 1; cursor: pointer;
   transition: background .16s, border-color .16s, transform .16s;
 }
@@ -1629,7 +1647,26 @@ window.__ModuleLoader__.load({
 .nw-wish:active { transform: scale(.96); }
 .nw-wish-glyph { font-size: 11px; line-height: 1; opacity: .85; }
 .nw-danger:hover { background: rgba(178, 62, 42, .12); color: #b23e2a; }
-.nw-danger[data-confirm="true"] { opacity: 1; background: rgba(178, 62, 42, .14); color: #a33220; pointer-events: auto; transform: none; }
+.nw-confirm {
+  display: flex; align-items: center; gap: 6px;
+  padding: 3px 4px 3px 10px; border-radius: 999px;
+  background: rgba(178, 62, 42, .1);
+  animation: nw-confirm-in .16s ease both;
+}
+.nw-confirm-text { font-size: 11.5px; line-height: 16px; color: #a33220; white-space: nowrap; }
+.nw-confirm-yes, .nw-confirm-no {
+  height: 24px; padding: 0 10px; border: 0; border-radius: 999px;
+  font: inherit; font-size: 11.5px; line-height: 1; cursor: pointer;
+  transition: background .16s, color .16s;
+}
+.nw-confirm-yes { background: #b23e2a; color: #fff7ee; }
+.nw-confirm-yes:hover { background: #9c3322; }
+.nw-confirm-no { background: transparent; color: var(--nw-ink, #5b4a23); }
+.nw-confirm-no:hover { background: rgba(60, 52, 28, .08); }
+@keyframes nw-confirm-in {
+  from { opacity: 0; transform: translateY(3px) scale(.96); }
+  to { opacity: 1; transform: none; }
+}
 @media (hover: none) { .nw-hover { opacity: 1; pointer-events: auto; transform: none; } }
 .nw-placeholder { padding: 46px 16px; text-align: center; color: #a09b91; font-size: 13px; line-height: 20px; animation: nw-fade .4s both; }
 .nw-doodle { display: block; margin: 0 auto 8px; color: #cfc8b6; animation: nw-float 3.4s ease-in-out infinite; }
@@ -1812,7 +1849,7 @@ window.__ModuleLoader__.load({
 @media (prefers-reduced-motion: reduce) {
   .nw-head, .nw-composer, .nw-foot, .nw-placeholder, .nw-error, .nw-countpill, .nw-filterpill,
   .nw-card, .nw-pinned, .nw-searchpill, .nw-doodle, .nw-add, .nw-drop,
-  .nw-focus-layer, .nw-focus-card { animation: none; }
+  .nw-focus-layer, .nw-focus-card, .nw-confirm { animation: none; }
   .nw-card, .nw-icon, .nw-add, .nw-swatch, .nw-composer, .nw-hover, .nw-searchpill, .nw-drop, .nw-drop-open,
   .nw-focus-cancel, .nw-focus-save { transition: none; }
   .nw-wish, .nw-focus-wish { transition: none; }
@@ -1839,7 +1876,8 @@ window.__ModuleLoader__.load({
   .nw-card { box-shadow: none; }
   .nw-text, .nw-textarea { color: #e6e2d7; }
   .nw-tag { color: rgba(232, 228, 218, .82); }
-  .nw-stamp, .nw-icon { color: rgba(228, 223, 208, .45); }
+  .nw-stamp { color: rgba(228, 223, 208, .45); }
+  .nw-icon { color: rgba(228, 223, 208, .7); }
   .nw-icon:hover { background: rgba(255, 250, 235, .08); color: rgba(255, 251, 240, .9); }
   .nw-storage { color: #6f6a60; }
   .nw-drop-tip { color: #6f6a60; }
@@ -1857,8 +1895,14 @@ window.__ModuleLoader__.load({
   .nw-focus-stamp, .nw-focus-hint { color: rgba(228, 223, 208, .5); }
   .nw-focus-cancel { color: #e6e2d7; border-color: rgba(255, 250, 235, .24); }
   .nw-focus-cancel:hover { background: rgba(255, 250, 235, .08); }
-  .nw-wish { color: #e6e2d7; background: rgba(255, 255, 255, .06); border-color: rgba(255, 250, 235, .18); }
+  .nw-wish { color: #e6e2d7; background: rgba(255, 255, 255, .12); border-color: rgba(255, 250, 235, .3); }
   .nw-wish:hover { background: rgba(255, 255, 255, .12); border-color: rgba(255, 250, 235, .3); }
+  .nw-confirm { background: rgba(220, 120, 100, .16); }
+  .nw-confirm-text { color: #f0b2a2; }
+  .nw-confirm-yes { background: #c2503a; color: #fff5ee; }
+  .nw-confirm-yes:hover { background: #a84330; }
+  .nw-confirm-no { color: rgba(240, 235, 225, .85); }
+  .nw-confirm-no:hover { background: rgba(255, 250, 235, .1); }
   .nw-focus-wish { color: #e6e2d7; background: rgba(255, 255, 255, .06); border-color: rgba(255, 250, 235, .24); }
   .nw-focus-wish:hover { background: rgba(255, 255, 255, .12); border-color: rgba(255, 250, 235, .36); }
   .nw-drop[data-mode="wishMissing"] { background: #2a2718; border-color: #574c2c; color: #cfc8b6; }

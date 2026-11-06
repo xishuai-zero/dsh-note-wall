@@ -1,6 +1,6 @@
 {
   "name": "dsh-note-wall",
-  "version": "0.2.6",
+  "version": "0.2.8",
   "private": true,
   "type": "module",
   "description": "A sticky-note wall in the DSH sidebar: quick capture, colors, pin, search, tag filter and Markdown export. · 便签墙：侧栏随手记录灵感。",
