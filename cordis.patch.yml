@@ -1,0 +1,15 @@
+# dsh-note-wall bundle patch.
+#
+# One insert row mounts the Host half. The browser half is declared by
+# package.json's dsh.client section and binds to the row whose name is the
+# bare package name.
+#
+# notesFile: optional override for the notes store; omit it to use
+#   $DSH_HOME/note-wall/notes.json. A machine-local override belongs in the
+#   user profile's cordis patch, not in this repository.
+# promptOptimizerData: optional path to PromptOptimizer's local data file;
+#   omit it to resolve %APPDATA%/@prompt-optimizer automatically.
+- insert:
+    - id: note-wall
+      name: 'dsh-note-wall'
+      config: {}

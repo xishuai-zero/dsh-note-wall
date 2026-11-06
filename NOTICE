@@ -1,0 +1,20 @@
+dsh-note-wall
+Copyright (C) 2026 dsh-note-wall contributors
+
+This program is licensed under the GNU Affero General Public License v3.0 only
+(AGPL-3.0-only). See LICENSE for the full license text.
+
+Third-party attribution
+-----------------------
+
+The prompt template in `src/wish-optimizer.mjs` (the "basic user
+optimization" system/user messages) is adapted from Prompt Optimizer:
+
+  Prompt Optimizer
+  Copyright (C) 2025 linshenkx
+  https://github.com/linshenkx/prompt-optimizer
+  Licensed under AGPL-3.0-only
+
+The adapter only reads PromptOptimizer's locally stored configuration file
+(no application code is bundled, launched or modified). The README
+"致谢与许可" section repeats this attribution.

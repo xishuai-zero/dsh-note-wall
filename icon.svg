@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Note Wall">
+  <defs>
+    <linearGradient id="nw-paper" x1="10" y1="8" x2="54" y2="58" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffd479"/>
+      <stop offset="1" stop-color="#f0a63c"/>
+    </linearGradient>
+    <linearGradient id="nw-fold" x1="40" y1="40" x2="54" y2="56" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffe7ae"/>
+      <stop offset="1" stop-color="#e2912a"/>
+    </linearGradient>
+  </defs>
+  <path d="M14 10h30l10 10v34a4 4 0 0 1-4 4H14a4 4 0 0 1-4-4V14a4 4 0 0 1 4-4Z" fill="url(#nw-paper)"/>
+  <path d="M44 10l10 10H48a4 4 0 0 1-4-4V10Z" fill="url(#nw-fold)"/>
+  <path d="M20 22h22M20 30h26M20 38h18M20 46h12" stroke="#7a4a12" stroke-width="3.2" stroke-linecap="round" opacity=".72"/>
+</svg>

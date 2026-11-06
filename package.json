@@ -1,0 +1,59 @@
+{
+  "name": "dsh-note-wall",
+  "version": "0.2.6",
+  "private": true,
+  "type": "module",
+  "description": "A sticky-note wall in the DSH sidebar: quick capture, colors, pin, search, tag filter and Markdown export. · 便签墙：侧栏随手记录灵感。",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xishuai-zero/dsh-note-wall.git"
+  },
+  "homepage": "https://github.com/xishuai-zero/dsh-note-wall",
+  "bugs": {
+    "url": "https://github.com/xishuai-zero/dsh-note-wall/issues"
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "note-wall",
+    "sticky-notes",
+    "prompt-optimizer"
+  ],
+  "main": "./index.js",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "src",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg",
+    "README.md",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": []
+    }
+  },
+  "scripts": {
+    "check": "node --check index.js && node --check client.js && node --check src/trust.mjs && node --check src/store.mjs && node --check src/wish-optimizer.mjs",
+    "test": "node --test"
+  },
+  "license": "AGPL-3.0-only"
+}

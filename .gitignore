@@ -1,0 +1,10 @@
+node_modules/
+npm-debug.log*
+.DS_Store
+Thumbs.db
+
+# local data, secrets and scratch files
+.env
+.env.*
+*.corrupt-*
+prompt-optimizer-data.json
